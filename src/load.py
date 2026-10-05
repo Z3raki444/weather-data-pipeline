@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pandas as pd
 import pg8000.dbapi
@@ -8,30 +9,74 @@ from extract import get_weather
 from transform import transform_weather
 
 
-# Load variables from .env
-load_dotenv()
+# --------------------------------------------------
+# Load .env file from the project root
+# --------------------------------------------------
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+ENV_FILE = PROJECT_ROOT / ".env"
+
+load_dotenv(ENV_FILE)
+
+
+# --------------------------------------------------
+# Connect to PostgreSQL
+# --------------------------------------------------
 
 def get_database_connection():
-    """
-    Connect to PostgreSQL using pg8000.
-    """
+
+    host = os.getenv("DB_HOST")
+    port = os.getenv("DB_PORT")
+    database = os.getenv("DB_NAME")
+    user = os.getenv("DB_USER")
+    password = os.getenv("DB_PASSWORD")
+
+    print(f"   ENV file found: {ENV_FILE.exists()}")
+    print(f"   Host: {host}")
+    print(f"   Port: {port}")
+    print(f"   Database: {database}")
+    print(f"   User: {user}")
+    print(f"   Password loaded: {password is not None}")
+
+    missing_variables = []
+
+    if not host:
+        missing_variables.append("DB_HOST")
+
+    if not port:
+        missing_variables.append("DB_PORT")
+
+    if not database:
+        missing_variables.append("DB_NAME")
+
+    if not user:
+        missing_variables.append("DB_USER")
+
+    if not password:
+        missing_variables.append("DB_PASSWORD")
+
+    if missing_variables:
+        raise ValueError(
+            "Missing environment variables: "
+            + ", ".join(missing_variables)
+        )
 
     connection = pg8000.dbapi.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        port=int(os.getenv("DB_PORT", "5432")),
-        database=os.getenv("DB_NAME", "weather_pipeline"),
-        user=os.getenv("DB_USER", "postgres"),
-        password=os.getenv("DB_PASSWORD"),
+        host=host,
+        port=int(port),
+        database=database,
+        user=user,
+        password=password,
     )
 
     return connection
 
 
+# --------------------------------------------------
+# Create weather table
+# --------------------------------------------------
+
 def create_weather_table(connection):
-    """
-    Create the weather table if it does not already exist.
-    """
 
     query = """
     CREATE TABLE IF NOT EXISTS weather (
@@ -65,16 +110,17 @@ def create_weather_table(connection):
 
     cursor.close()
 
-    print("Weather table ready.")
+    print("   Weather table ready.")
 
+
+# --------------------------------------------------
+# Load data into PostgreSQL
+# --------------------------------------------------
 
 def load_weather(df, connection):
-    """
-    Load transformed weather data into PostgreSQL.
-    """
 
     if df.empty:
-        print("No weather data available to load.")
+        print("   No weather data available to load.")
         return
 
     insert_query = """
@@ -115,7 +161,6 @@ def load_weather(df, connection):
 
     for _, row in df.iterrows():
 
-        # Convert pandas Timestamp to Python datetime
         observed_at = row["observed_at"]
 
         if hasattr(observed_at, "to_pydatetime"):
@@ -126,7 +171,6 @@ def load_weather(df, connection):
         if hasattr(extracted_at, "to_pydatetime"):
             extracted_at = extracted_at.to_pydatetime()
 
-        # Handle possible missing values
         precipitation = (
             None
             if pd.isna(row["precipitation"])
@@ -146,7 +190,7 @@ def load_weather(df, connection):
         )
 
         record = (
-            row["city"],
+            str(row["city"]),
             float(row["temperature"]),
             int(row["humidity"]),
             precipitation,
@@ -170,9 +214,13 @@ def load_weather(df, connection):
     cursor.close()
 
     print(
-        f"{len(records)} weather records loaded successfully."
+        f"   {len(records)} weather records loaded successfully."
     )
 
+
+# --------------------------------------------------
+# Run complete ETL pipeline
+# --------------------------------------------------
 
 if __name__ == "__main__":
 
@@ -188,6 +236,7 @@ if __name__ == "__main__":
             f"   Extracted {len(raw_data)} records."
         )
 
+
         print("\n2. Transforming weather data...")
 
         clean_data = transform_weather(raw_data)
@@ -195,6 +244,7 @@ if __name__ == "__main__":
         print(
             f"   {len(clean_data)} clean records ready."
         )
+
 
         print("\n3. Connecting to PostgreSQL...")
 
@@ -204,9 +254,11 @@ if __name__ == "__main__":
             "   PostgreSQL connection successful."
         )
 
+
         print("\n4. Creating weather table...")
 
         create_weather_table(connection)
+
 
         print("\n5. Loading weather data...")
 
@@ -215,9 +267,11 @@ if __name__ == "__main__":
             connection
         )
 
+
         print(
             "\nETL pipeline completed successfully!"
         )
+
 
     except Exception as error:
 
@@ -228,6 +282,7 @@ if __name__ == "__main__":
         print(
             f"Error: {error}"
         )
+
 
     finally:
 
