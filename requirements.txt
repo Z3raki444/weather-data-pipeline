@@ -1,0 +1,4 @@
+requests
+pandas
+pg8000
+python-dotenv
