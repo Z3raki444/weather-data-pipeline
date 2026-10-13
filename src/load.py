@@ -10,19 +10,18 @@ from transform import transform_weather
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-ENV_FILE = PROJECT_ROOT / ".env"
+ENV_FILE = PROJECT_ROOT / ".env.weather"
 
 load_dotenv(ENV_FILE)
 
 
 def get_connection():
-
     return pg8000.dbapi.connect(
-        host=os.getenv("DB_HOST"),
-        port=int(os.getenv("DB_PORT")),
-        database=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
+        host=os.getenv("WEATHER_DB_HOST"),
+        port=int(os.getenv("WEATHER_DB_PORT")),
+        database=os.getenv("WEATHER_DB_NAME"),
+        user=os.getenv("WEATHER_DB_USER"),
+        password=os.getenv("WEATHER_DB_PASSWORD"),
     )
 
 

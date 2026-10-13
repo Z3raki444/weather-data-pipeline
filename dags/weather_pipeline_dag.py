@@ -12,7 +12,7 @@ from load import get_connection, load_weather
 
 @dag(
     dag_id="weather_pipeline",
-    schedule=None,
+    schedule="@hourly",
     start_date=pendulum.datetime(2026, 10, 1, tz="UTC"),
     catchup=False,
     tags=["weather", "etl"],
