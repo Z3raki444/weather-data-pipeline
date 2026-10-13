@@ -1,3 +1,15 @@
 .env
+.env.airflow
+.env.weather
+
 __pycache__/
-*.pyc
+*.py[cod]
+
+.venv/
+venv/
+
+logs/
+.pytest_cache/
+
+.DS_Store
+Thumbs.db
