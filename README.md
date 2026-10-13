@@ -22,6 +22,20 @@ Apache Airflow
     Docker
 ```
 
+## Project Screenshots
+
+### Airflow DAG Success
+
+![Airflow DAG success](assets/airflow-success.png)
+
+### Airflow Run History
+
+![Airflow run history](assets/airflow-dag-runs.png)
+
+### PostgreSQL Weather Data
+
+![PostgreSQL weather data](assets/postgres-weather-table.png)
+
 ## Features
 
 - Extracts current weather data for Berlin, Hamburg, Munich, Frankfurt, and Cologne.
