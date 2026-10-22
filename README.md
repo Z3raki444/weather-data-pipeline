@@ -295,3 +295,13 @@ Possible extensions include:
 ## Portfolio Summary
 
 This project demonstrates an end-to-end ETL workflow using API ingestion, Python data transformation, PostgreSQL persistence, Dockerized infrastructure, and scheduled orchestration with Apache Airflow.
+
+## Automated quality checks
+
+The [Python CI workflow](.github/workflows/ci.yml) runs offline transformation tests and Python syntax checks on pushes and pull requests. Run the tests locally with:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+GitHub Actions does not download live weather data or start Airflow/PostgreSQL. For the full integration check, follow the setup instructions above. Generated Airflow task logs are excluded from Git and screenshots remain in `assets/`.
