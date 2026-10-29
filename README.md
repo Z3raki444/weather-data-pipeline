@@ -2,6 +2,22 @@
 
 A containerized data engineering project that extracts live weather data from the Open-Meteo API, transforms and validates it with Pandas, loads it into PostgreSQL, and orchestrates the workflow hourly with Apache Airflow.
 
+[![Python transformation checks](https://github.com/Z3raki444/weather-data-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/Z3raki444/weather-data-pipeline/actions/workflows/ci.yml)
+
+## Project at a glance
+
+| Area | Implementation |
+| --- | --- |
+| Source | Open-Meteo API for five German cities |
+| Workflow | Hourly Airflow DAG: extract → transform → load |
+| Storage | PostgreSQL with upsert keyed by city and observation time |
+| Quality | Required-field checks, range checks, and duplicate filtering |
+| Reproducibility | Docker Compose for Airflow; example environment files and offline CI tests |
+
+**Review the code:** [Extract](src/extract.py) · [Transform](src/transform.py) · [Load](src/load.py) · [Airflow DAG](dags/weather_pipeline_dag.py) · [Tests](tests/test_transform.py)
+
+> **Current scope:** A local scheduled ETL demonstration, not a cloud-hosted production service. CI checks transformations offline; it does not test a full live Airflow/PostgreSQL deployment.
+
 ## Architecture
 
 ```text
